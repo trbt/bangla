@@ -1,0 +1,47 @@
+name: catis
+
+services:
+  catis:
+    container_name: catis
+    image: upmind/catis:26.1.1-bd
+    restart: unless-stopped
+    ports:
+      - 9000:9000
+    environment:
+      APP_CONTEXT: /
+      MONGODB_URI: mongodb://mongo:27017/catis
+      PLAY_APP_SECRET:
+      AUTH_SIGNER_KEY:
+      AUTH_CRYPTER_KEY:
+    volumes:
+      - ./conf/application.conf:/app/conf/application.conf:ro
+      - ./logs/:/app/logs/
+
+  proxy:
+    container_name: proxy
+    image: caddy:latest
+    restart: unless-stopped
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+
+  mongo:
+    container_name: mongodb
+    image: mongodb/mongodb-community-server:7.0.14-ubuntu2204
+    restart: unless-stopped
+    #environment:
+      #MONGO_INITDB_ROOT_USERNAME: root
+      #MONGO_INITDB_ROOT_PASSWORD: example
+    ports:
+      - 127.0.0.1:27017:27017
+    volumes:
+      - mongo_data:/data/db
+
+volumes:
+  mongo_data:
+  caddy_data:
+  caddy_config:
